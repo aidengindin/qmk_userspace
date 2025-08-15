@@ -80,6 +80,22 @@ void leader_end_user(void) {
     }
 }
 
+bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case KC_NAV_SPC:
+        case KC_MOUSE_TAB:
+        case KC_MEDIA_ESC:
+        case KC_NUM_BSPC:
+        case KC_SYM_ENT:
+        case KC_FUN_DEL:
+            // Enable hold-on-other-key-press for thumb layer taps
+            return true;
+        default:
+            // Disable for home row mods and other keys
+            return false;
+    }
+}
+
 bool process_record_keymap(uint16_t keycode, keyrecord_t *record) {
     if (record->event.pressed) {
         switch (keycode) {
