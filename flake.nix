@@ -15,10 +15,13 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             qmk
+            gnumake
             python3
             avrdude
             dfu-util
             teensy-loader-cli
+            gcc-arm-embedded
+            pkgsCross.arm-embedded.buildPackages.gcc
           ];
 
           shellHook = ''
