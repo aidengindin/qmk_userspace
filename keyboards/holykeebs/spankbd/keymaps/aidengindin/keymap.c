@@ -60,9 +60,19 @@ enum custom_keycodes {
 #define KC_FUN_DEL      LT(_FUN,     KC_DEL)
 #define KC_PROGRAM_SLSH LT(_PROGRAM, KC_SLSH)
 
+// Combos for one-shot mods
+const uint16_t PROGMEM combo_sft[] = {KC_SFT_F, KC_SFT_J, COMBO_END};
+const uint16_t PROGMEM combo_ctl[] = {KC_CTL_D, KC_CTL_K, COMBO_END};
+const uint16_t PROGMEM combo_alt[] = {KC_ALT_S, KC_ALT_L, COMBO_END};
+const uint16_t PROGMEM combo_gui[] = {KC_GUI_A, KC_GUI_SCLN, COMBO_END};
+
 const uint16_t PROGMEM leader_combo[] = {KC_J, KC_K, COMBO_END};
 
 combo_t key_combos[] = {
+    COMBO(combo_sft, OSM(MOD_LSFT)),
+    COMBO(combo_ctl, OSM(MOD_LCTL)),
+    COMBO(combo_alt, OSM(MOD_LALT)),
+    COMBO(combo_gui, OSM(MOD_LGUI)),
     COMBO(leader_combo, QK_LEAD),
 };
 
@@ -144,22 +154,6 @@ bool process_record_keymap(uint16_t keycode, keyrecord_t *record) {
     }
     return true;
 }
-
-//#ifdef POINTING_DEVICE_ENABLE
-#if 0
-report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
-    uint8_t layer = get_highest_layer(layer_state);
-    if (layer == _NAV) {
-        if (mouse_report.x) tap_code(mouse_report.x > 0 ? KC_RGHT : KC_LEFT);
-        if (mouse_report.y) tap_code(mouse_report.y > 0 ? KC_DOWN : KC_UP);
-    } else {
-        mouse_report.h = mouse_report.x;
-        mouse_report.v = mouse_report.y;
-    }
-    mouse_report.x = mouse_report.y = 0;
-    return mouse_report;
-}
-#endif
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //    ┌───────┬───────┬───────────┬────────────┬───────────┐   ┌─────────┬────────────┬──────────┬───────┬──────────────┐
