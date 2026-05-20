@@ -4,7 +4,8 @@
 #include QMK_KEYBOARD_H
 #include "users/holykeebs/holykeebs.h"
 
-// const tap_dance_action_t tap_dance_actions[] PROGMEM = {};
+const bool DEBUG = false;
+
 const key_override_t *key_overrides[] = {};
 
 enum {
@@ -66,31 +67,12 @@ const uint16_t PROGMEM combo_ctl[] = {KC_CTL_D, KC_CTL_K, COMBO_END};
 const uint16_t PROGMEM combo_alt[] = {KC_ALT_S, KC_ALT_L, COMBO_END};
 const uint16_t PROGMEM combo_gui[] = {KC_GUI_A, KC_GUI_SCLN, COMBO_END};
 
-const uint16_t PROGMEM leader_combo[] = {KC_J, KC_K, COMBO_END};
-
 combo_t key_combos[] = {
     COMBO(combo_sft, OSM(MOD_LSFT)),
     COMBO(combo_ctl, OSM(MOD_LCTL)),
     COMBO(combo_alt, OSM(MOD_LALT)),
     COMBO(combo_gui, OSM(MOD_LGUI)),
-    COMBO(leader_combo, QK_LEAD),
 };
-
-void leader_start_user(void) {
-    // TODO: light up the LEDs or something
-}
-
-void leader_end_user(void) {
-    os_variant_t host_os = detected_host_os();
-
-    if (leader_sequence_two_keys(KC_O, KC_W)) {
-        if (host_os == OS_MACOS) {
-            SEND_STRING(SS_LGUI("w"));
-        } else {
-            SEND_STRING(SS_LALT(SS_TAP(X_F4)));
-        }
-    }
-}
 
 bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
@@ -108,8 +90,55 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
     }
 }
 
+bool on_left_hand(uint16_t keycode, keyrecord_t *record) {
+    return record->event.key.row < 4;
+}
+
+bool get_chordal_hold(
+        uint16_t tap_hold_keycode,
+        keyrecord_t *tap_hold_record,
+        uint16_t other_keycode,
+        keyrecord_t *other_record
+        ) {
+
+    // Thumb keys always chord
+    switch (tap_hold_keycode) {
+        case KC_NAV_SPC:
+        case KC_MOUSE_TAB:
+        case KC_MEDIA_ESC:
+        case KC_NUM_BSPC:
+        case KC_SYM_ENT:
+        case KC_FUN_DEL:
+            return true;
+    }
+
+    bool is_tap_left = on_left_hand(tap_hold_keycode, tap_hold_record);
+    bool is_other_left = on_left_hand(other_keycode, other_record);
+    bool is_different_hand = (is_tap_left != is_other_left);
+
+    if (DEBUG) {
+        uprintf("CHORD DEBUG: Key1(Mod)=%u [R:%u C:%u H:%s] | Key2=%u [R:%u C:%u H:%s] | Result: %s\n",
+            tap_hold_keycode, tap_hold_record->event.key.row, tap_hold_record->event.key.col, is_tap_left ? "LEFT" : "RIGHT",
+            other_keycode, other_record->event.key.row, other_record->event.key.col, is_other_left ? "LEFT" : "RIGHT",
+            is_different_hand ? "TRUE (Hold)" : "FALSE (Tap)"
+        );
+    }
+
+    return is_different_hand;
+}
+
 bool process_record_keymap(uint16_t keycode, keyrecord_t *record) {
     if (record->event.pressed) {
+        if (DEBUG) {
+            bool is_left = on_left_hand(keycode, record);
+            uprintf("Key: %u | Row: %u | Col: %u | Hand: %s\n",
+                keycode,
+                record->event.key.row,
+                record->event.key.col,
+                is_left ? "LEFT" : "RIGHT"
+            );
+        }
+
         switch (keycode) {
             case LEQ:
                 SEND_STRING("<=");
