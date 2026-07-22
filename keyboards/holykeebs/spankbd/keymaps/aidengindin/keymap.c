@@ -94,37 +94,8 @@ bool on_left_hand(uint16_t keycode, keyrecord_t *record) {
     return record->event.key.row < 4;
 }
 
-bool get_chordal_hold(
-        uint16_t tap_hold_keycode,
-        keyrecord_t *tap_hold_record,
-        uint16_t other_keycode,
-        keyrecord_t *other_record
-        ) {
-
-    // Thumb keys always chord
-    switch (tap_hold_keycode) {
-        case KC_NAV_SPC:
-        case KC_MOUSE_TAB:
-        case KC_MEDIA_ESC:
-        case KC_NUM_BSPC:
-        case KC_SYM_ENT:
-        case KC_FUN_DEL:
-            return true;
-    }
-
-    bool is_tap_left = on_left_hand(tap_hold_keycode, tap_hold_record);
-    bool is_other_left = on_left_hand(other_keycode, other_record);
-    bool is_different_hand = (is_tap_left != is_other_left);
-
-    if (DEBUG) {
-        uprintf("CHORD DEBUG: Key1(Mod)=%u [R:%u C:%u H:%s] | Key2=%u [R:%u C:%u H:%s] | Result: %s\n",
-            tap_hold_keycode, tap_hold_record->event.key.row, tap_hold_record->event.key.col, is_tap_left ? "LEFT" : "RIGHT",
-            other_keycode, other_record->event.key.row, other_record->event.key.col, is_other_left ? "LEFT" : "RIGHT",
-            is_different_hand ? "TRUE (Hold)" : "FALSE (Tap)"
-        );
-    }
-
-    return is_different_hand;
+char chordal_hold_handedness(keypos_t key) {
+    return key.row < 4 ? 'L' : 'R';
 }
 
 bool process_record_keymap(uint16_t keycode, keyrecord_t *record) {
@@ -217,20 +188,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                       _______ , _______ , _______ ,     _______ , _______ , _______
 ),
 
-//    ┌──────┬──────┬───────────┬──────────┬─────┐   ┌──────┬────────┬──────┬──────┬──────┐
-//    │      │      │           │          │     │   │      │        │      │      │      │
-//    ├──────┼──────┼───────────┼──────────┼─────┤   ├──────┼────────┼──────┼──────┼──────┤
-//    │ lgui │ lalt │   lctl    │   lsft   │     │   │      │ SNIPER │ btn4 │ btn5 │      │
-//    ├──────┼──────┼───────────┼──────────┼─────┤   ├──────┼────────┼──────┼──────┼──────┤
-//    │      │      │ csag-none │ csa-none │     │   │      │  wh_l  │ wh_d │ wh_u │ wh_r │
-//    └──────┴──────┼───────────┼──────────┼─────┤   ├──────┼────────┼──────┼──────┴──────┘
-//                  │           │          │     │   │ btn2 │  btn1  │ btn3 │
-//                  └───────────┴──────────┴─────┘   └──────┴────────┴──────┘
+//    ┌──────┬──────┬───────────┬──────────┬─────┐   ┌─────────┬─────────┬─────────┬─────────┬─────────┐
+//    │      │      │           │          │     │   │         │         │         │         │         │
+//    ├──────┼──────┼───────────┼──────────┼─────┤   ├─────────┼─────────┼─────────┼─────────┼─────────┤
+//    │ lgui │ lalt │   lctl    │   lsft   │     │   │         │ SNIPER  │ MS_BTN4 │ MS_BTN5 │         │
+//    ├──────┼──────┼───────────┼──────────┼─────┤   ├─────────┼─────────┼─────────┼─────────┼─────────┤
+//    │      │      │ csag-none │ csa-none │     │   │         │ MS_WHLL │ MS_WHLD │ MS_WHLU │ MS_WHLR │
+//    └──────┴──────┼───────────┼──────────┼─────┤   ├─────────┼─────────┼─────────┼─────────┴─────────┘
+//                  │           │          │     │   │ MS_BTN2 │ MS_BTN1 │ MS_BTN3 │
+//                  └───────────┴──────────┴─────┘   └─────────┴─────────┴─────────┘
 [_MOUSE] = LAYOUT_split_3x5_3(
   _______ , _______ , _______ , _______ , _______ ,     _______ , _______ , _______ , _______ , _______,
-  KC_LGUI , KC_LALT , KC_LCTL , KC_LSFT , _______ ,     _______ , SNIPER  , KC_BTN4 , KC_BTN5 , _______,
-  _______ , _______ , KC_HYPR , KC_MEH  , _______ ,     _______ , KC_WH_L , KC_WH_D , KC_WH_U , KC_WH_R,
-                      _______ , _______ , _______ ,     KC_BTN2 , KC_BTN1 , KC_BTN3
+  KC_LGUI , KC_LALT , KC_LCTL , KC_LSFT , _______ ,     _______ , SNIPER  , MS_BTN4 , MS_BTN5 , _______,
+  _______ , _______ , KC_HYPR , KC_MEH  , _______ ,     _______ , MS_WHLL , MS_WHLD , MS_WHLU , MS_WHLR,
+                      _______ , _______ , _______ ,     MS_BTN2 , MS_BTN1 , MS_BTN3
 ),
 
 //    ┌──────┬──────┬───────────┬──────────┬─────┐   ┌──────┬──────┬──────┬──────┬──────┐

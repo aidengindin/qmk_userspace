@@ -15,5 +15,7 @@ compile_commands.json
 .clangd/
 .cache/
 
-# Crush directory
 .crush/
+.claude/
+
+users/holykeebs
